@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${__dir}"
+# kubectl, k
+export KUBECONFIG=$PWD/kubeconfig.yaml
+source <(kubectl completion bash)
+alias k=kubectl
+source <(kubectl completion bash | sed '/__start_kubectl kubectl/ s/ kubectl/ k/g')
+
+
+# helm, h
+source <(helm completion bash)
+alias h=helm
+source <(helm completion bash | sed '/__start_helm helm/ s/ helm/ h/g')
+
+
+
+# istio
+ISTIO_DIR=$(find $PWD -maxdepth 1 -type d -iname 'istio*')
+if [[ "${ISTIO_DIR}" ]];
+then
+  # ISTIO_DIR found
+  export PATH=$PATH:"${ISTIO_DIR}"/bin
+fi
+
+
+
+# k3d
+source <(k3d completion bash)
