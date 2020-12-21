@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        ports:
+        - containerPort: 80
+        command: ["/bin/sh"]
+        args: 
+          - "-c"
+          - |
+            echo '#!/bin/sh
+            read -r a_line
+            echo -e "HTTP/1.1 200 OK\n\n $a_line \n$(wget ifconfig.me -qO-)\n$(date)"' > /tmp/webserver.sh && \
+            chmod +x /tmp/webserver.sh &&\
+            /bin/nc -v -p 80 -lk -e /tmp/webserver.sh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: busybox
+spec:
+  type: ClusterIP
+  #type: NodePort
+  selector:
+    app: busybox
+  ports:
+    - name: http
+      protocol: TCP
+      targetPort: 80
+      port: 80
+      
+      # # nodePort only when type: NodePort
+      # # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+      #nodePort: 30001
+
+
+#---
+#apiVersion: networking.k8s.io/v1beta1
+#kind: Ingress
+#metadata:
+#  name: busybox
+#  annotations:
+#    kubernetes.io/ingress.class: "traefik"
+#spec:
+#  rules:
+#  - http:
+#      paths:
+#      - path: /
+#        backend:
+#          serviceName: busybox
+#          servicePort: 80
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: busybox-gw
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: busybox
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - busybox-gw
+  http:
+  - match:
+    - uri:
+        exact: /productpage
+    - uri:
+        prefix: /static
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+        host: busybox
+        port:
+          number: 80

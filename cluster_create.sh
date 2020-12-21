@@ -24,7 +24,7 @@ main() {
     --wait
 
   k3d kubeconfig \
-    write mycluster \
+    write $CLUSTER_NAME \
     --switch-context \
     --output ./kubectl.yaml
   chmod 600 ./kubectl.yaml
@@ -33,6 +33,9 @@ main() {
   k3d node list
   source  k3d.source
     # ATP: kubectl/helm ready 
+  echo "== breathing a couple of mins before checking final state ..."
+  sleep 120
+  kubectl get pod,service -A
   cat <<EOT
   source $PWD/k3.source
   kubectl get all -A
