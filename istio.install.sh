@@ -95,10 +95,17 @@ main() {
   install_istio 
     # ATP: istioctl can be used (is in alias) 
 
+  kubectl apply -f <(./istioctl kube-inject -f manifests/one-files/busybox.deployment.istio.yaml )
+  kubectl apply -f <(./istioctl kube-inject -f istio-1.8.1/samples/bookinfo/platform/kube/bookinfo.yaml)
+  kubectl apply -f <(./istioctl kube-inject -f istio-1.8.1/samples/bookinfo/networking/bookinfo-gateway.yaml)
+
   cat <<EOT
+## Already executed
 kubectl apply -f <(./istioctl kube-inject -f manifests/one-files/busybox.deployment.istio.yaml )
-kubectl apply -f <(./istioctl kube-inject -f istios/istio-1.8.1/samples/bookinfo/platform/kube/bookinfo.yaml)
-kubectl apply -f <(./istioctl kube-inject -f istios/istio-1.8.1/samples/bookinfo/networking/bookinfo-gateway.yaml)
+kubectl apply -f <(./istioctl kube-inject -f istio-1.8.1/samples/bookinfo/platform/kube/bookinfo.yaml)
+kubectl apply -f <(./istioctl kube-inject -f istio-1.8.1/samples/bookinfo/networking/bookinfo-gateway.yaml)
+#####
+
 
 istioctl dashboard kiali --address 0.0.0.0
 istioctl dashboard grafana
