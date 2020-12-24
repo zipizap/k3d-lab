@@ -1,0 +1,9 @@
+mirrors:
+  docker.io:
+    endpoint:
+     #- "http://10.0.2.2:5000"
+      - "http://host-local-mirror-registry:5000"
+configs:
+ #"10.0.2.2:5000":
+  "host-local-mirror-registry:5000":
+    insecure_skip_verify: true

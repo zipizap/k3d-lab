@@ -34,7 +34,7 @@ install_istio() {
   ## https://docs.microsoft.com/en-us/azure/aks/servicemesh-istio-install?pivots=client-operating-system-linux
   ## https://istio.io/latest/docs/setup/getting-started/
   # Download
-  export ISTIO_VERSION=1.8.0
+  export ISTIO_VERSION=1.8.1
   if ! ./istioctl version &>/dev/null
   then 
     rm $PWD/istioctl &>/dev/null || true
@@ -96,10 +96,11 @@ main() {
     # ATP: istioctl can be used (is in alias) 
 
   cat <<EOT
-k apply -f <(istioctl kube-inject -f manifests/one-files/busybox.deployment.istio.yaml )
-k apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/bookinfo/platform/kube/bookinfo.yaml
+kubectl apply -f <(./istioctl kube-inject -f manifests/one-files/busybox.deployment.istio.yaml )
+kubectl apply -f <(./istioctl kube-inject -f istios/istio-1.8.1/samples/bookinfo/platform/kube/bookinfo.yaml)
+kubectl apply -f <(./istioctl kube-inject -f istios/istio-1.8.1/samples/bookinfo/networking/bookinfo-gateway.yaml)
 
-istioctl dashboard kiali
+istioctl dashboard kiali --address 0.0.0.0
 istioctl dashboard grafana
 istioctl dashboard prometheus
 istioctl dashboard jaeger
