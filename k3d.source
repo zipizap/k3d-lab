@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+O_DIR=$PWD
 cd "${__dir}"
 # kubectl, k
 export KUBECONFIG=$PWD/kubeconfig.yaml
@@ -27,3 +28,5 @@ fi
 
 # k3d
 source <(k3d completion bash)
+
+cd $O_DIR
