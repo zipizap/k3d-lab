@@ -28,8 +28,6 @@ AGENTS_NUM=0
 
 
 #K3D_ADDITIONAL_OPTS="${K3D_ADDITIONAL_OPTS:-}"
-#
-### Use host-local-mirror-registry
 K3D_ADDITIONAL_OPTS="${K3D_ADDITIONAL_OPTS:-}"
 
 
