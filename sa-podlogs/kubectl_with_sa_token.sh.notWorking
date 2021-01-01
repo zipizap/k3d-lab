@@ -1,0 +1,17 @@
+#set -x
+#
+# USAGE:
+#   $0 mysa sa-podlogs get pods 
+#
+
+SvcAccount_NAME="${1:-mysa}" ; shift 1
+NAMESPACE="${1:-sa-podlogs}" ; shift 1
+SECRET_NAME=$(kubectl -n $NAMESPACE get serviceaccount "${SvcAccount_NAME}" -o=jsonpath='{.secrets[0].name}')
+TOKEN=$(kubectl -n $NAMESPACE get secret $SECRET_NAME -o=jsonpath='{.data.token}' | base64 -d)
+kubectl -n $NAMESPACE \
+    --cluster=k3d-myk3dcluster \
+    --token=$TOKEN \
+    ${@}
+
+
+
