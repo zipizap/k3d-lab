@@ -11,8 +11,10 @@ SA_NAMESPACE="${1:-sa-podlogs}" ; shift 1
 #
 # This needs to be a kubeconfig-context that already exists (in current $KUBECONFIG file, or in default ~/.kube/config), and that allows access as cluster-admin. It will be used to gather necessary info about the serviceaccount SA (basically its SECRET and TOKEN)
 CLUSTERADMIN_CONTEXT_NAME=k3d-myk3dcluster
-SA_SECRET_NAME=$(kubectl --context=$CLUSTERADMIN_CONTEXT_NAME -n $SA_NAMESPACE get serviceaccount "${SA_NAME}" -o=jsonpath='{.secrets[0].name}')
+SERVER_URL=https://0.0.0.0:33219
 
+
+SA_SECRET_NAME=$(kubectl --context=$CLUSTERADMIN_CONTEXT_NAME -n $SA_NAMESPACE get serviceaccount "${SA_NAME}" -o=jsonpath='{.secrets[0].name}')
 SA_TOKEN=$(kubectl --context=$CLUSTERADMIN_CONTEXT_NAME -n $SA_NAMESPACE get secret $SA_SECRET_NAME -o=jsonpath='{.data.token}' | base64 -d)
 # alternative to not-using a clusteradmin-account, could be to previously store the TOKEN in a file, and then everytime it would be needed just read it from the file
 # SA_TOKEN=$(cat $SA_NAME.token)
@@ -72,7 +74,7 @@ SA_TOKEN=$(kubectl --context=$CLUSTERADMIN_CONTEXT_NAME -n $SA_NAMESPACE get sec
 #   This was the hardest to find clear info about, an the reason to create this
 #   small demo: how to use "kubectl --token" correctly
 KUBECONFIG=/dev/null  kubectl \
-  --server=https://0.0.0.0:33219 --insecure-skip-tls-verify \
+  --server=$SERVER_URL --insecure-skip-tls-verify \
   --token=$SA_TOKEN \
   \
   -n $SA_NAMESPACE \

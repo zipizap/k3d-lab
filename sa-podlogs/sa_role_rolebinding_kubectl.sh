@@ -70,6 +70,7 @@ EOT
 
 cr_role_rolebinding() {
   # role, rolebinding
+  NGINXDEPLOY2_POD_NAME=$(kubectl -n sa-podlogs get pods --selector=app=nginxdeploy2 -o=jsonpath='{.items[0].metadata.name}')
   cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Namespace
@@ -90,6 +91,7 @@ rules:
 - apiGroups: [""]
   resources: ["pods/log"]
   #resourceNames: ["nginxdeploy2-69db9bf477-2rt7x"]
+  resourceNames: ["$NGINXDEPLOY2_POD_NAME"]
   verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -114,7 +116,13 @@ kubectl_with_sa_via_kubeconfig() {
   #kubectl get pods -A
   kubectl -n sa-podlogs get pods
   kubectl -n sa-podlogs \
-    logs --selector=app=nginxdeploy --timestamps --prefix
+    logs --selector=app=nginxdeploy2 --timestamps --prefix
+  # check its missing priviledges
+  if kubectl -n sa-podlogs logs --selector=app=nginxdeploy --timestamps --prefix 
+  then
+    echo "???? unexpected ???"
+    exit 1
+  fi
 
 }
 
@@ -123,7 +131,14 @@ kubectl_with_sa_via_token() {
   "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
      get pods
   "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
+     logs --selector=app=nginxdeploy2 --timestamps --prefix 
+  # check its missing priviledges
+  if "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
      logs --selector=app=nginxdeploy --timestamps --prefix
+  then
+    echo "???? unexpected ???"
+    exit 1
+  fi
 
 
 }
@@ -133,11 +148,11 @@ main() {
   # gen user priv-key + csr
   SA_NAME=mysa
 
-  # initial_cleanup
-  # cr_deployment_nginx
-  # cr_sa
-  # cr_role_rolebinding
-  # kubectl_with_sa_via_kubeconfig
+  initial_cleanup
+  cr_deployment_nginx
+  cr_sa
+  cr_role_rolebinding
+  kubectl_with_sa_via_kubeconfig
   kubectl_with_sa_via_token
   
   shw_info "=== execution completed successfully ==="
