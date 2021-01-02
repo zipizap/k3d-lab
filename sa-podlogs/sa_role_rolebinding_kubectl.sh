@@ -71,7 +71,8 @@ EOT
 cr_role_rolebinding() {
   # role, rolebinding
   NGINXDEPLOY2_POD_NAME=$(kubectl -n sa-podlogs get pods --selector=app=nginxdeploy2 -o=jsonpath='{.items[0].metadata.name}')
-  cat <<EOF | kubectl apply -f -
+  #cat <<EOF | kubectl apply -f -
+  cat <<EOF | tee /dev/fd/2 | kubectl apply -f -
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -83,10 +84,9 @@ metadata:
   namespace: sa-podlogs
   name: $SA_NAME
 rules:
-# minimal pod permitions, to enable pods/log by label
+# minimal pod permitions necesary, to enable pods/log by label
 - apiGroups: [""]
   resources: ["pods"]
-  #resourceNames: ["my-configmap"]
   verbs: ["list"]
 - apiGroups: [""]
   resources: ["pods/log"]
@@ -114,7 +114,7 @@ EOF
 kubectl_with_sa_via_kubeconfig() {
   kubectl config use-context $SA_NAME
   #kubectl get pods -A
-  kubectl -n sa-podlogs get pods
+  #kubectl -n sa-podlogs get pods
   kubectl -n sa-podlogs \
     logs --selector=app=nginxdeploy2 --timestamps --prefix
   # check its missing priviledges
@@ -128,13 +128,11 @@ kubectl_with_sa_via_kubeconfig() {
 
 kubectl_with_sa_via_token() {
   SA_NAMESPACE=sa-podlogs
-  "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
-     get pods
-  "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
-     logs --selector=app=nginxdeploy2 --timestamps --prefix 
+  kubectl_with_token_in_namespace() { "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE "$@"; }
+  kubectl_with_token_in_namespace get pods
+  kubectl_with_token_in_namespace logs --selector=app=nginxdeploy2 --timestamps --prefix 
   # check its missing priviledges
-  if "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
-     logs --selector=app=nginxdeploy --timestamps --prefix
+  if kubectl_with_token_in_namespace logs --selector=app=nginxdeploy --timestamps --prefix
   then
     echo "???? unexpected ???"
     exit 1
