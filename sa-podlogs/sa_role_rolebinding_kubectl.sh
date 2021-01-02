@@ -109,12 +109,7 @@ EOF
   kubectl -n sa-podlogs get sa,secret,role,rolebindings
 }
 
-kubectl_with_saToken() {
-  # kubectl config use-context k3d-myk3dcluster
-  # SA_NAMESPACE=sa-podlogs
-  # "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
-  #    logs --selector=app=nginxdeploy --timestamps --prefix
-
+kubectl_with_sa_via_kubeconfig() {
   kubectl config use-context $SA_NAME
   #kubectl get pods -A
   kubectl -n sa-podlogs get pods
@@ -123,16 +118,27 @@ kubectl_with_saToken() {
 
 }
 
+kubectl_with_sa_via_token() {
+  SA_NAMESPACE=sa-podlogs
+  "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
+     get pods
+  "${__dir}"/kubectl_with_sa_token.sh $SA_NAME $SA_NAMESPACE \
+     logs --selector=app=nginxdeploy --timestamps --prefix
+
+
+}
+
 main() {
   # NOTE: all kubectl commands should be run with cluster-admin privileges
   # gen user priv-key + csr
   SA_NAME=mysa
 
-  initial_cleanup
-  cr_deployment_nginx
-  cr_sa
-  cr_role_rolebinding
-  kubectl_with_saToken
+  # initial_cleanup
+  # cr_deployment_nginx
+  # cr_sa
+  # cr_role_rolebinding
+  # kubectl_with_sa_via_kubeconfig
+  kubectl_with_sa_via_token
   
   shw_info "=== execution completed successfully ==="
 }
