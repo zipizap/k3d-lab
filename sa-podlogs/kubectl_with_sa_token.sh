@@ -73,8 +73,10 @@ SA_TOKEN=$(kubectl --context=$CLUSTERADMIN_CONTEXT_NAME -n $SA_NAMESPACE get sec
 # - using the SA_TOKEN of the serviceaccount, to perform Authentication in the api-server
 #   This was the hardest to find clear info about, an the reason to create this
 #   small demo: how to use "kubectl --token" correctly
-KUBECONFIG=/dev/null  kubectl \
-  --server=$SERVER_URL --insecure-skip-tls-verify \
+#
+#KUBECONFIG=/dev/null  kubectl \
+kubectl \
+  --kubeconfig=/dev/null --server=$SERVER_URL --insecure-skip-tls-verify \
   --token=$SA_TOKEN \
   \
   -n $SA_NAMESPACE \
