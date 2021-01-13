@@ -9,7 +9,8 @@ SA_NAMESPACE="${1:-sa-podlogs}" ; shift 1
 
 ## Extract the SA_TOKEN value
 #
-# This needs to be a kubeconfig-context that already exists (in current $KUBECONFIG file, or in default ~/.kube/config), and that allows access as cluster-admin. It will be used to gather necessary info about the serviceaccount SA (basically its SECRET and TOKEN)
+# This needs to be a kubeconfig-context that already exists (in current $KUBECONFIG file, or in default ~/.kube/config), and that allows access as cluster-admin. 
+# It will be used to gather necessary info about the serviceaccount SA (basically its SECRET and TOKEN)
 CLUSTERADMIN_CONTEXT_NAME=k3d-myk3dcluster
 SERVER_URL=https://0.0.0.0:33219
 
@@ -24,7 +25,7 @@ SA_TOKEN=$(kubectl --context=$CLUSTERADMIN_CONTEXT_NAME -n $SA_NAMESPACE get sec
 #     API Access Control:
 #       - Authentication (basically server/client certifs, client user/pass, client TOKEN :) , password, etc )
 #       - Authorization  (basically RBAC (cluster)roles, (cluster)rolebindings)
-#       - AdmissionControl (basically automatic-valiation-and-changing of incomming requests, before execution, like a pre-hook... out of scope for now)
+#       - AdmissionControl (basically automatic-validation-and-changing of incomming requests, before execution, like a pre-hook... out of scope for now)
 #         
 #     [2] https://kubernetes.io/docs/concepts/security/controlling-access/
 #         - service-accounts use JSON WEBTOKENS (JWT) as an Authentication TOKEN
@@ -54,31 +55,33 @@ SA_TOKEN=$(kubectl --context=$CLUSTERADMIN_CONTEXT_NAME -n $SA_NAMESPACE get sec
 #     I could not found an easy way to make "kubectl --token" work... and was hard to find dumbed-down info about it, or very-complete examples 
 #     So I made this demo, to try-and-test untill it worked correctly, in a controlled environment
 #     Basically when I tried to use "kubectl --token xxxx get pods" there was some *unexpected* conflict with the $KUBECONFIG file (or ~/kube/config)
-#     that seemed to be partially reusing some kubeconfig-user values and not just the --token... dint looked further into it, simply put the "kubectl --token" 
-#     was not working easily as expected for me.
-#     And after all the tests, the conclusion is:
+#     that seemed to be partially reusing some kubeconfig-user values and not just the --token... I didnt looked further into it, simply the fact was that "kubectl --token"  was not working easily as expected for me.
+#     So I made all these tests and nd after all, the conclusion seems to be:
 #       1) If you define in your kubeconfig-file a new user containing the TOKEN, and a new context containing that-user with your-cluester, then the "kubectl get pods" will work, without using "--token"
 #          See functions cr_sa() kubectl_with_sa_via_kubeconfig()
 # 
 #       2) If you use an empty-kubeconfig-file (like /dev/null), then with it in $KUBECONFIG you can use "kubectl --token" and it will work, but you'll also have to add some more authentication flags to kubectl for it
 #         to know what is your api-server url. This works, and is what this current file does :)
-#         Also, in this file there is an upper section that extract the token using a cluster-admin account. This could be replaced by a simple 'SA_TOKEN=$(cat mysa.token)' 
-#         to avoid requiring cluster-admin at all and instead just read the token from an existing file
+#         Also, in this file there is an upper section that reads-and-extract the token using a cluster-admin account. This could be replaced by a simple 'SA_TOKEN=$(cat mysa.token)' 
+#         to avoid requiring cluster-admin at all and instead just read the token from an previously-prepared file
 #
-#       NOTE: trying "kubectl --as mysa ..." uses the kubeconfig file to read the "user" mysa info ,where you would have to place the token. This would not allow direct "kubectl --token " commands as it requires modification of kubectl-file to ad user/token/context as done in cr_sa()
+#       NOTE: trying "kubectl --as mysa ..." uses the kubeconfig file to read the "user" mysa info ,where you would have to place the token beforehand. This would not allow direct "kubectl --token " commands 
+#       as it still requires the mentioned modification in kubectl-file, to add the user/token/context - this was tested in function cr_sa(), look there for more details
 #
 
 ## Run kubectl without any kubeconfig file and 
 # - passing the k8s api-server url ignoring its certificate-check
 # - using the SA_TOKEN of the serviceaccount, to perform Authentication in the api-server
 #   This was the hardest to find clear info about, an the reason to create this
-#   small demo: how to use "kubectl --token" correctly
+#   small demo: how to properly use "kubectl --token" correctly
 #
-#KUBECONFIG=/dev/null  kubectl \
 kubectl \
-  --kubeconfig=/dev/null --server=$SERVER_URL --insecure-skip-tls-verify \
-  --token=$SA_TOKEN \
-  \
+  --kubeconfig=/dev/null --server=$SERVER_URL --insecure-skip-tls-verify --token=$SA_TOKEN \
   -n $SA_NAMESPACE \
   ${@}
+#
+#KUBECONFIG=/dev/null  kubectl \
+#  --server=$SERVER_URL --insecure-skip-tls-verify --token=$SA_TOKEN \
+#  -n $SA_NAMESPACE \
+#  ${@}
 
