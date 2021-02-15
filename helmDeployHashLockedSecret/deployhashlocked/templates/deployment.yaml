@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "deployhashlocked.fullname" . }}
+  labels:
+    {{- include "deployhashlocked.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "deployhashlocked.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        # If secret.yaml has changed, then this annotation will force the 
+        # deployment to restart on its next "helm upgrade --install" 
+        # Limitation: The secret.yaml must be part of same chart of the deployment
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      labels:
+        {{- include "deployhashlocked.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        command: {{ .Values.command }}
+
+        {{- with .Values.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }} 
+
+        {{- with .Values.volumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 10 }}
+        {{- end }} 
+
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }} 
