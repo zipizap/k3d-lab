@@ -15,7 +15,23 @@ spec:
         # If secret.yaml has changed, then this annotation will force the 
         # deployment to restart on its next "helm upgrade --install" 
         # Limitation: The secret.yaml must be part of same chart of the deployment
-        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/chartsecret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum | quote }}
+        
+        # If there is a nonchart-secret in same namespace on cluster (not from file, this time is being read from the cluster, 
+        # from existing cluster-secret not managed by this helm-chart  ;)
+        # and that nonchart-secret changes, then this annotation will force the deployment to restart on its next "helm upgrade --install" 
+        # The lookup function will read from the cluster the secret and its .metadata.resourceVersion value, and lock that into deployment annotation
+        # Everytime the secret changes, its resourceVersion will also change, so the next time there is a "helm upgrade --install" on this deployment
+        # it will notice the change in resourceVersion and force rollout (restart) of deployment pods
+        #
+        # function: lookup "apiVersion" "kind" "namespace" "objName"
+        # https://helm.sh/docs/chart_template_guide/functions_and_pipelines/
+        #
+        {{- if (lookup "v1" "Secret" .Release.Namespace "nonchart-secret") }}
+        checksum/nonchartsecret: {{ (lookup "v1" "Secret" .Release.Namespace "nonchart-secret").metadata.resourceVersion | quote }}
+        {{- end }}
+        
+
       labels:
         {{- include "deployhashlocked.selectorLabels" . | nindent 8 }}
     spec:
