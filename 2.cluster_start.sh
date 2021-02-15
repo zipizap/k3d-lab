@@ -1,2 +1,2 @@
 k3d cluster start myk3dcluster
-./cluster_stats.sh
+./2.cluster_stats.sh
