@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    kubernetes.io/name: sigma
+  name: sigma
+  namespace: isample-httpfwd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      kubernetes.io/name: sigma
+  template:
+    metadata:
+      labels:
+        kubernetes.io/name: sigma
+    spec:
+      containers:
+      - image: zipizap/httpfwd
+        name: httpfwd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    kubernetes.io/name: sigma
+  name: sigma
+  namespace: isample-httpfwd
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    kubernetes.io/name: sigma
+  type: ClusterIP
+
+
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: sigma
+#spec:
+#  rules:
+#  - host: sigma.mycluster.corp
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: sigma
+#            port:
+#              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: sigma
+  namespace: isample-httpfwd
+spec:
+  gateways:
+  - gw-wildcard-dot-mycluster-dot-corp
+  hosts:
+  - sigma.mycluster.corp
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: sigma
+        port:
+          number: 80
+
+
+
+# curl -kv -HHost:sigma.mycluster.corp http://172.26.0.2/

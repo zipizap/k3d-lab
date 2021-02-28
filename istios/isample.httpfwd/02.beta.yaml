@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    kubernetes.io/name: beta
+    app: beta
+  name: beta
+  namespace: isample-httpfwd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      kubernetes.io/name: beta
+  template:
+    metadata:
+      labels:
+        kubernetes.io/name: beta
+        app: beta
+    spec:
+      containers:
+      - image: zipizap/httpfwd
+        name: httpfwd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    kubernetes.io/name: beta
+    app: beta
+  name: beta
+  namespace: isample-httpfwd
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    kubernetes.io/name: beta
+  type: ClusterIP
+
+
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: beta
+#spec:
+#  rules:
+#  - host: beta.mycluster.corp
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: beta
+#            port:
+#              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: beta
+  namespace: isample-httpfwd
+  labels:
+    app: beta
+spec:
+  gateways:
+  - gw-wildcard-dot-mycluster-dot-corp
+  hosts:
+  - beta.mycluster.corp
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: beta
+        port:
+          number: 80
+
+
+
+# curl -kv -HHost:beta.mycluster.corp http://172.26.0.2/

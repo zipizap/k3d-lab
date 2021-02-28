@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: gw-wildcard-dot-mycluster-dot-corp
+  namespace: isample-httpfwd
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - hosts:
+    - "*.mycluster.corp"
+    port:
+      number: 80
+      name: http
+      protocol: HTTP
+

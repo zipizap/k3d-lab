@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    kubernetes.io/name: delta
+    app: delta
+  name: delta
+  namespace: isample-httpfwd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      kubernetes.io/name: delta
+  template:
+    metadata:
+      labels:
+        kubernetes.io/name: delta
+        app: delta
+    spec:
+      containers:
+      - image: zipizap/httpfwd
+        name: httpfwd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    kubernetes.io/name: delta
+    app: delta
+  name: delta
+  namespace: isample-httpfwd
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    kubernetes.io/name: delta
+  type: ClusterIP
+
+
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: delta
+#spec:
+#  rules:
+#  - host: delta.mycluster.corp
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: delta
+#            port:
+#              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: delta
+  namespace: isample-httpfwd
+  labels:
+    app: delta
+spec:
+  gateways:
+  - gw-wildcard-dot-mycluster-dot-corp
+  hosts:
+  - delta.mycluster.corp
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: delta
+        port:
+          number: 80
+
+
+
+# curl -kv -HHost:delta.mycluster.corp http://172.26.0.2/

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    kubernetes.io/name: gamma
+  name: gamma
+  namespace: isample-httpfwd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      kubernetes.io/name: gamma
+  template:
+    metadata:
+      labels:
+        kubernetes.io/name: gamma
+    spec:
+      containers:
+      - image: zipizap/httpfwd
+        name: httpfwd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    kubernetes.io/name: gamma
+  name: gamma
+  namespace: isample-httpfwd
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    kubernetes.io/name: gamma
+  type: ClusterIP
+
+
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: gamma
+#spec:
+#  rules:
+#  - host: gamma.mycluster.corp
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: gamma
+#            port:
+#              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: gamma
+  namespace: isample-httpfwd
+spec:
+  gateways:
+  - gw-wildcard-dot-mycluster-dot-corp
+  hosts:
+  - gamma.mycluster.corp
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: gamma
+        port:
+          number: 80
+
+
+
+# curl -kv -HHost:gamma.mycluster.corp http://172.26.0.2/

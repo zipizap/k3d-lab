@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    kubernetes.io/name: alpha
+    app: alpha
+  name: alpha
+  namespace: isample-httpfwd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      kubernetes.io/name: alpha
+  template:
+    metadata:
+      labels:
+        kubernetes.io/name: alpha
+        app: alpha
+    spec:
+      containers:
+      - image: zipizap/httpfwd
+        name: httpfwd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    kubernetes.io/name: alpha
+    app: alpha
+  name: alpha
+  namespace: isample-httpfwd
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    kubernetes.io/name: alpha
+  type: ClusterIP
+
+
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: alpha
+#spec:
+#  rules:
+#  - host: alpha.mycluster.corp
+#    http:
+#      paths:
+#      - path: /
+#        pathType: Prefix
+#        backend:
+#          service:
+#            name: alpha
+#            port:
+#              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: alpha
+  namespace: isample-httpfwd
+  labels:
+    app: alpha
+spec:
+  gateways:
+  - gw-wildcard-dot-mycluster-dot-corp
+  hosts:
+  - alpha.mycluster.corp
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: alpha
+        port:
+          number: 80
+
+
+
+# curl -kv -HHost:alpha.mycluster.corp http://172.26.0.2/
