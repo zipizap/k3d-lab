@@ -75,7 +75,7 @@ main() {
   sleep 60
   kubectl get pod,service -A
   cat <<EOT
-  source $PWD/k3.source
+  source $PWD/k3d.source
   kubectl get all -A
 EOT
 
