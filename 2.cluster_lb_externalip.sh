@@ -9,7 +9,7 @@ set -o errexit
 set -o pipefail
 set -o nounset
 shopt -s inherit_errexit
-set -o xtrace
+#set -o xtrace
 
 
 source k3d.source
