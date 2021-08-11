@@ -1,0 +1,1 @@
+[44m[1;30m(./watch.sh:19): k():[m        kubectl --context k3d-myk3dcluster proxy
