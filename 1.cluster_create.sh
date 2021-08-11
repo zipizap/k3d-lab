@@ -53,18 +53,17 @@ main() {
     create $CLUSTER_NAME \
     --servers=$SERVERS_NUM \
     --agents=$AGENTS_NUM \
-    --wait \
     --volume "${__dir}"/registries.yaml:/etc/rancher/k3s/registries.yaml \
+    --wait \
     ${K3D_ADDITIONAL_OPTS}
-
 
   host-local-mirror-registry_setup
 
 
   k3d kubeconfig \
-    write $CLUSTER_NAME \
-    --switch-context \
-    --output ./kubeconfig.yaml
+    merge $CLUSTER_NAME \
+    --kubeconfig-switch-context \
+    --output ./kubeconfig.yaml --overwrite
   chmod 600 ./kubeconfig.yaml
 
   k3d cluster list

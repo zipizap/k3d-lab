@@ -13,6 +13,6 @@ set -o pipefail
 set -o nounset
 #set -o xtrace
 
-cd "${__dir}" && source k3d.source && k9s
+cd "${__dir}" && source k3d.source && ./k9s
 
 
