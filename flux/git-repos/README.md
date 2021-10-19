@@ -5,12 +5,12 @@ To make this gogs lab more portable, I've left here the ssh-keys and config need
 
 ```
 # 1st-time clone
-cd <<same-dir-that-also-contains_subdir _user1_ssh/ >>
-GIT_SSH_COMMAND="ssh -F $PWD/_user1_ssh/config" git clone ssh://git@172.17.0.1:10022/user1/gitopsgitrepo.git
+cd <<same-dir-that-also-contains_subdir user1.ssh.config/ >>
+GIT_SSH_COMMAND="ssh -F $PWD/user1.ssh.config/config" git clone ssh://git@172.17.0.1:10022/user1/gitopsgitrepo.git
 cd gitopsgitrepo
-git config core.sshCommand "ssh -F $PWD/../_user1_ssh/config"
+git config core.sshCommand "ssh -F $PWD/../user1.ssh.config/config"
 
-# And from now on, the local repo is configured to load the _user1_ssh/config which will use the prepared keys
+# And from now on, the local repo is configured to load the user1.ssh.config/config which will use the prepared keys
 # So from now on, normal workflow becomes
 cd gitopsgitrepo
 git remote show origin

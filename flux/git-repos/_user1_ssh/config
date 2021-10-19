@@ -1,3 +1,0 @@
-Host *
-    # NOTE: update this full-path to match your case
-    IdentityFile ~/configs/k3d-lab/flux/git-repos/_user1_ssh/id_ed25519
