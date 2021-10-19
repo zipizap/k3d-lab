@@ -14,9 +14,9 @@ shopt -s inherit_errexit
 NOTICE: this was never tried, its a hopefull idea :)
 Dont want to spend much more time in this detail, so if necessary improve and test it
 
+cd "${__dir}"
 if [[ -d _var_gogs/ ]]
 then
   echo "Manually rename directory _var_gogs/ before attremptinbg to restore"
 fi
-cd "${__dir}"
 sudo tar xvf "${1?USAGE: $0 a_backup_file.tgz}"

@@ -1,5 +1,6 @@
 #
-# This is horrible, horrible - for good backups read about gogs included backup/restore functionality
+# Yes, this is horrible, horrible but fast-and-enough for now 
+# For good backups read about gogs included backup/restore functionality
 #
 
 
