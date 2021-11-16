@@ -12,11 +12,15 @@ shopt -s inherit_errexit
 set -o xtrace
 
 main() {
+  GOGS_IP_INSIDE_K3D_NET=172.26.0.5 
+
+  
+  # Clone git-repo fleet-infra, to easily navigate review its files
   cd "${__dir}"/git-repos
   mkdir -p fleet-infra
   if [[ ! -d fleet-infra ]]
   then 
-    GIT_SSH_COMMAND="ssh -F $PWD/user1.ssh.config/config" git clone ssh://git@172.26.0.5/user1/fleet-infra.git
+    GIT_SSH_COMMAND="ssh -F $PWD/user1.ssh.config/config" git clone ssh://git@${GOGS_IP_INSIDE_K3D_NET}/user1/fleet-infra.git
     cd fleet-infra
     git config core.sshCommand "ssh -F $PWD/../user1.ssh.config/config" || true
     cd ..
@@ -25,9 +29,11 @@ main() {
     git pull
     cd ..
   fi
+
+  # flux bootstrap with gitrepo fleet-infra
   cd "${__dir}"/git-repos
   flux bootstrap git \
-    --url=ssh://git@172.26.0.5/user1/fleet-infra.git \
+    --url=ssh://git@${GOGS_IP_INSIDE_K3D_NET}/user1/fleet-infra.git \
     --branch=master \
     --path=clusters/my-cluster \
     --private-key-file=user1.ssh.config/id_ed25519 --password='' 
