@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: myconfigmap
+
+data:
+
+  # k create configmap myconfigmap
+
+  # --from-literal=myLitKey1=myLitVal1
+  myLitKey1: myLitVal1
+  # --from-literal=myLitKey2=myLitVal2
+  myLitKey2: myLitVal2
+
+  # --from-file=myFileKey3=myfile3.txt   
+  # >> the key is "myFileKey3" != "myfile3.txt"
+  myFileKey3: |
+    This is file3 line1
+    This is file3 line2
+    This is file3 line3
+
+  # --from-file=myfile4.txt
+  # >> the key is file-basename "myfile4.txt"
+  myfile4.txt: |
+    This is file4 line1
+    This is file4 line2
+    This is file4 line3
+
+  # --from-file=dirWithFile5File6
+  myfile5.txt: |
+    This is file5 line1
+    This is file5 line2
+    This is file5 line3
+  myfile6.txt: |
+    This is file6 line1
+    This is file6 line2
+    This is file6 line3

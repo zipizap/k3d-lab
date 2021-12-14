@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mypod1
+  name: mypod1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mypod1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: mypod1
+    spec:
+      hostname: mypod1
+      subdomain: z
+      containers:
+      - image: busybox
+        name: busybox
+        command: ["/bin/sh"]
+        args: ["-c", 'sleep 10000']

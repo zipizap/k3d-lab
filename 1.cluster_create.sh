@@ -18,7 +18,7 @@ set -o xtrace
 SERVERS_NUM=1
 
 # Worker-nodes number: 0, 1, 2, ...
-AGENTS_NUM=0    
+AGENTS_NUM=2    
   # 0, 1, 2, ...
   # NOTE: 0 means there will be no workernodes, only master-node. But the master-node will normally execute workloads, so its ok, and 
   #       in fact is the most memory-optimal setup: cluster in only 1 node
