@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: netpol-mypod1
+spec:
+  podSelector:                 # << empty '{}' selects all pods of namespace 
+    matchLabels:
+      app: mypod1
+
+# pod without networkpolicy:
+#   + has allow-all ingress/egress traffic 
+# pod with 1 networkpolicy:
+#   + containing "spec.ingress": all ingress traffic blocked except for the ingress-rules
+#   + missing "spec.ingress" or with it empty {}: does not have any ingress-allow-rule, so effectively all ingress traffic is blocked
+#   + containing "spec.egress" : all egress traffic blocked except for the egress-rules
+#   + missing "spec.egress" or with it empty {}:  does not have any egress-allow-rule, so effectively all egress traffic is blocked
+# Refs: kubectl explain networkpolicies.spec
+#
+# NOTE: Not all CNI plugins suport networkpolicies (flannel does not). CNIs with netpol generally support Ingress but not Egress (ex: Weave)
+#
+#
+# policyTypes:                 # [optional] defaults to detect if "spec.ingress:" or "spec.egress:" exists
+# - Ingress                    #   If neither "spec.ingress|egress" exists, then defaults to "Ingress" (in which case, we would only 
+# - Egress                     #   have policyTypes:["Ingress"] and no spec.ingress which would effectively block all ingress traffic
+#
+# ingress:                     # empty or non-existent means: block all ingress traffic
+# - from:
+#   - ipBlock:
+#       cidr: 172.17.0.0/16
+#       except:
+#       - 172.17.1.0/24
+#   - namespaceSelector:
+#       matchLabels:
+#         mynslabelkey: mynslabelval    # << label of ns (manually set label in ns)
+#   - podSelector:
+#       matchLabels:
+#         mypodlabelkey: mypodlabelval
+#   ports:                                    # port receiving traffic
+#   - protocol: TCP
+#     port: 6379
+# egress:                       # empty or non-existent means: block all egress traffic
+# - to:
+#   - ipBlock:
+#       cidr: 10.0.0.0/24
+#   ports:                                    # port receiving traffic
+#   - protocol: TCP
+#     port: 5978

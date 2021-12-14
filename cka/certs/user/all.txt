@@ -1,0 +1,49 @@
+ 2274  openssl genrsa -out jane.key 2048
+ 2275  ll          
+ 2276  openssl req -new -key jane.key -sub "/CN=jane" -out jane.csr
+ 2277  openssl req -new -key jane.key -subj "/CN=jane" -out jane.csr
+ 2278  vi csr.yaml
+ 2279  cat myuser.csr | base64 | tr -d "\n"
+ 2280  cat jane.csr | base64 | tr -d "\n"
+ 2281  fg                 
+ 2282  cat sc        
+ 2283  cat csr.yaml
+ 2284  k get user
+ 2285  k get pod -A
+ 2286  ll                 
+ 2287  k kubectl get csr
+ 2288  kubectl get csr           
+ 2289  k apply -f csr.yaml                                                               
+ 2290  k cluster-info                                                                    
+ 2291  k version                                                                     
+ 2292  k9s
+ 2293  vi csr.yaml 
+ 2294  k apply -f csr.yaml                   
+ 2295  k get csr                            
+ 2296  k certificate approve jane
+ 2297  kubectl get csr myuser -o jsonpath='{.status.certificate}'| base64 -d > myuser.crt
+ 2298  kubectl get csr myuser -o jsonpath='{.status.certificate}'| base64 -d > myuser.crt
+ 2299  kubectl get csr jane -o jsonpath='{.status.certificate}'| base64 -d > jane.crt
+ 2300  ll
+ 2301  cat jane.crt
+ 2302  opnenssl req -noout -text -in jane.crt
+ 2303  openssl req -noout -text -in jane.crt
+ 2304  ll
+ 2305  cat jane.crt
+ 2306  openssl x509 -noout -text -in jane.crt
+ 2307  k config get-contexts
+ 2308
+ 2309  kubectl config set-credentials jane --client-key=jane.key --client-certificate=jane.crt --embed-certs=true
+ 2310
+ 2311  fg
+ 2312  kubectl get-con
+ 2313  k get text
+ 2314  k config get-contexts
+ 2315  k config get-contexts  -a
+ 2316  k config get-contexts
+ 2317  vi $KUBECONFIG
+ 2318  kubectl config set-context jane --cluster=k3d-myk3dcluster --user=jane
+ 2319  k config get-contexts
+ 2320  k --context jane get pod -A
+ 2321  k --context jane get pod
+

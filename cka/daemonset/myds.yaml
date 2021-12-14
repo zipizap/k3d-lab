@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: myds
+  name: myds
+spec:
+  selector:
+    matchLabels:
+      app: myds
+  template:
+    metadata:
+      labels:
+        app: myds
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - k3d-myk3dcluster-agent-1
+      containers:
+      - image: nginx
+        name: nginx

@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.annotation1: foo
+    ingress.annotation2: bla
+  creationTimestamp: null
+  name: myingress
+spec:
+  defaultBackend:
+    service:
+      name: defaultbackendsvc
+      port:
+        name: http
+  ingressClassName: myIngressClass-or-default
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: svc1
+            port:
+              number: 8080
+        path: /anyHost
+        pathType: Exact
+  - host: host1-with-tls.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: svc1
+            port:
+              name: http
+        path: /aaa               # match:    /aaa  (only this exact match!)
+        pathType: Exact          # no-match: /aaa/ , /aaabb , /aaa/bb , ...
+  - host: with.path.prefix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: svc
+            port:
+              number: 8080
+        path: /                   # match-any-path: / , /aa , /aa/bb , ...
+        pathType: Prefix
+      - backend:
+          service:
+            name: svc
+            port:
+              number: 8080
+        path: /aPref              # match:    /aPref   , /aPref/ , /aPref/bb , /aPref/bb/cc ...
+        pathType: Prefix          # no-match: /aPrefbb
+  tls:
+  - hosts:
+    - host1-with-tls.com
+    secretName: my-cert

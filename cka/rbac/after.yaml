@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+...
+spec:
+  containers:
+  - image: nginx
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-h6kg4
+      readOnly: true
+  ...
+  serviceAccount: mysa
+  serviceAccountName: mysa
+  volumes:
+  - name: kube-api-access-h6kg4
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
