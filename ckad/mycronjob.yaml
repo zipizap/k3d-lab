@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mycronjob
+spec:
+  schedule: '*/1 * * * *'
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      template:
+        spec:
+          containers:
+          - command:
+            - sleep
+            - "30"
+            image: busybox
+            name: mycronjob
+          restartPolicy: Never
