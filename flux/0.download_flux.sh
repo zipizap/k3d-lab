@@ -12,9 +12,9 @@ shopt -s inherit_errexit
 set -o xtrace
 
 main() {
-  curl -Ls https://github.com/fluxcd/flux2/releases/download/v0.18.2/flux_0.18.2_linux_amd64.tar.gz --output - | tar xzvf - 
+  curl -Ls https://github.com/fluxcd/flux2/releases/download/v0.24.1/flux_0.24.1_linux_amd64.tar.gz --output - | tar xzvf - 
   chmod -v +x flux
-  ./flux --version
+  ./flux --version >> flux.version
 }
 main "${@}"
 
